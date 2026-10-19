@@ -81,6 +81,7 @@ export function createProject(
     ownerId: input.ownerId,
     notes: input.notes,
     budget: input.budget,
+    moneyFlow: input.moneyFlow,
     createdAt: now,
     updatedAt: now,
     createdBy: bundle.viewerId,
@@ -116,6 +117,7 @@ export function updateProjectDetails(
       | "ownerId"
       | "notes"
       | "budget"
+      | "moneyFlow"
     >
   >,
   now: string,

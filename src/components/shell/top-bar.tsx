@@ -118,7 +118,7 @@ export function TopBar() {
         <Button type="button" size="icon-sm" variant="ghost" aria-label="Configuración" onClick={() => setSettingsOpen(true)}>
           <Settings />
         </Button>
-        <Button type="button" size="sm" onClick={() => setCreateOpen(true)}>
+        <Button type="button" size="sm" className="rounded-full px-4" onClick={() => setCreateOpen(true)}>
           Proyecto
         </Button>
       </div>

@@ -34,12 +34,15 @@ export function Sidebar() {
     <div className="flex h-full flex-col bg-sidebar">
       <div className="space-y-3 px-3 py-3">
         <Input id="project-search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar proyectos" aria-label="Buscar proyectos" />
-        <div className="grid grid-cols-2 gap-1 rounded-xl bg-muted p-1">
+        <div className="grid grid-cols-3 gap-1 rounded-xl bg-muted p-1">
           <Button type="button" size="sm" variant={view === "map" ? "default" : "ghost"} onClick={() => setView("map")}>
             Mapa
           </Button>
           <Button type="button" size="sm" variant={view === "summary" ? "default" : "ghost"} onClick={() => setView("summary")}>
             Resumen
+          </Button>
+          <Button type="button" size="sm" variant={view === "money" ? "default" : "ghost"} onClick={() => setView("money")}>
+            Dinero
           </Button>
         </div>
         <div className="flex flex-wrap gap-1">
@@ -48,7 +51,7 @@ export function Sidebar() {
               key={item.id}
               type="button"
               onClick={() => setStatus(item.id)}
-              className={`rounded-full px-2.5 py-1 text-xs ${status === item.id ? "bg-foreground text-background" : "bg-muted text-muted-foreground"}`}
+              className={`rounded-full px-2.5 py-1 text-xs ${status === item.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-background"}`}
             >
               {item.label}
             </button>
@@ -83,7 +86,7 @@ export function Sidebar() {
                         requestViewport({ type: "project", projectId: project.id });
                       }
                     }}
-                    className={`flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left ${selectedId === project.id ? "bg-muted" : "hover:bg-muted/70"}`}
+                    className={`flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left ${selectedId === project.id ? "bg-card shadow-sm" : "hover:bg-background"}`}
                   >
                     <span className="size-2.5 shrink-0 rounded-full" style={{ background: project.color }} />
                     <ProjectIcon icon={project.icon} className="size-3.5 text-muted-foreground" />
@@ -115,7 +118,7 @@ function FilterChip({ active, onClick, children }: { active: boolean; onClick: (
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-full px-2 py-1 text-[11px] ${active ? "bg-foreground text-background" : "text-muted-foreground hover:bg-muted"}`}
+      className={`rounded-full px-2 py-1 text-[11px] ${active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-background"}`}
     >
       {children}
     </button>

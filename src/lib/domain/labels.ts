@@ -1,4 +1,4 @@
-import type { Category, Priority, ProjectStatus, RelationKind } from "@/lib/domain/types";
+import type { Category, MoneyFlow, Priority, ProjectStatus, RelationKind } from "@/lib/domain/types";
 
 export const STATUS_LABEL: Record<ProjectStatus, string> = {
   idea: "Idea",
@@ -23,6 +23,11 @@ export const CATEGORY_LABEL: Record<Category, string> = {
   negocio: "Negocio",
   evento: "Evento",
   personal: "Personal",
+};
+
+export const MONEY_FLOW_LABEL: Record<MoneyFlow, string> = {
+  save: "Ahorro",
+  spend: "Gasto",
 };
 
 export const RELATION_LABEL: Record<RelationKind, string> = {

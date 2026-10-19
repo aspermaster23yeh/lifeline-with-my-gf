@@ -23,6 +23,8 @@ export const RELATIONS = ["enables", "depends_on", "related"] as const;
 
 export const TASK_STATUSES = ["open", "done"] as const;
 
+export const MONEY_FLOWS = ["spend", "save"] as const;
+
 export const ICON_IDS = [
   "House",
   "PiggyBank",
@@ -39,14 +41,10 @@ export const ICON_IDS = [
 ] as const;
 
 export const PROJECT_COLORS = [
-  { id: "clay", value: "#c4622d" },
-  { id: "sage", value: "#6e8b74" },
-  { id: "sea", value: "#3d7a8c" },
-  { id: "plum", value: "#8a6278" },
-  { id: "gold", value: "#b7893a" },
-  { id: "rose", value: "#b85c6a" },
-  { id: "ink", value: "#3e4a59" },
-  { id: "olive", value: "#7c8640" },
+  { id: "blue", value: "#4285F4" },
+  { id: "red", value: "#EA4335" },
+  { id: "yellow", value: "#FBBC04" },
+  { id: "green", value: "#34A853" },
 ] as const;
 
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
@@ -54,6 +52,7 @@ export type Priority = (typeof PRIORITIES)[number];
 export type Category = (typeof CATEGORIES)[number];
 export type RelationKind = (typeof RELATIONS)[number];
 export type TaskStatus = (typeof TASK_STATUSES)[number];
+export type MoneyFlow = (typeof MONEY_FLOWS)[number];
 export type IconId = (typeof ICON_IDS)[number];
 
 export type Workspace = {
@@ -90,6 +89,7 @@ export type Project = {
   ownerId: string | null;
   notes: string;
   budget: number | null;
+  moneyFlow: MoneyFlow;
   createdAt: string;
   updatedAt: string;
   createdBy: string;

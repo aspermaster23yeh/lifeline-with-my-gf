@@ -73,6 +73,7 @@ function projectPayload(project: Project) {
     owner_id: project.ownerId,
     notes: project.notes,
     budget: project.budget,
+    money_flow: project.moneyFlow === "save" ? "save" : "spend",
   };
 }
 
@@ -94,11 +95,11 @@ export class SupabaseRepository implements LifeMapRepository {
   async load(): Promise<Bundle> {
     const supabase = client();
     const { data: auth, error: authError } = await supabase.auth.getUser();
-    assertNoError(authError);
     const user = auth.user;
     if (!user) {
       throw new AuthRequiredError();
     }
+    assertNoError(authError);
 
     const { data: memberships, error: memberError } = await supabase
       .from("workspace_members")
@@ -213,7 +214,7 @@ export class SupabaseRepository implements LifeMapRepository {
   subscribe(workspaceId: string, onRemote: () => void): () => void {
     const supabase = client();
     const channel = supabase
-      .channel(`life-map:${workspaceId}`)
+      .channel(`life-map:${workspaceId}:${crypto.randomUUID()}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "projects", filter: `workspace_id=eq.${workspaceId}` },
@@ -534,6 +535,7 @@ type ProjectRow = {
   owner_id: string | null;
   notes: string;
   budget: number | null;
+  money_flow?: string | null;
   created_at: string;
   updated_at: string;
   created_by: string;
@@ -620,6 +622,7 @@ function mapProject(row: ProjectRow): Project {
     ownerId: row.owner_id,
     notes: row.notes,
     budget: row.budget === null ? null : Number(row.budget),
+    moneyFlow: row.money_flow === "save" ? "save" : "spend",
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     createdBy: row.created_by,

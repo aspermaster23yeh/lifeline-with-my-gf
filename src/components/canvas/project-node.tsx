@@ -3,6 +3,7 @@
 import { Handle, NodeResizeControl, Position, type Node, type NodeProps } from "@xyflow/react";
 
 import { ProjectIcon } from "@/components/icons";
+import { inkOn } from "@/lib/domain/color";
 import { STATUS_LABEL } from "@/lib/domain/labels";
 import { isOverdue, progressPercent, tasksForProject } from "@/lib/domain/progress";
 import { CARD_HEIGHT, formatShortDate, monthWidthContaining, targetDateFromWidth, todayIso } from "@/lib/domain/timeline";
@@ -31,16 +32,13 @@ export function ProjectNode({ data, selected }: NodeProps<ProjectFlowNode>) {
 
   return (
     <article
-      className={`group relative flex h-full flex-col justify-between overflow-hidden rounded-[18px] border px-3 py-2.5 shadow-[0_16px_30px_-22px_rgba(50,32,18,0.7)] ${
-        selected ? "ring-2 ring-foreground/70" : ""
+      className={`group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card py-2.5 pr-3 pl-4 ${
+        selected ? "ring-2 ring-primary" : ""
       }`}
-      style={{
-        background: `color-mix(in oklab, ${project.color} 18%, var(--card))`,
-        borderColor: `color-mix(in oklab, ${project.color} 42%, transparent)`,
-        height: CARD_HEIGHT,
-      }}
+      style={{ height: CARD_HEIGHT }}
       aria-label={project.title}
     >
+      <span className="absolute inset-y-3 left-0 w-1 rounded-full" style={{ background: project.color }} />
       <Handle type="target" position={Position.Left} className="life-handle" />
       <Handle type="source" position={Position.Right} className="life-handle" />
       <NodeResizeControl
@@ -63,8 +61,8 @@ export function ProjectNode({ data, selected }: NodeProps<ProjectFlowNode>) {
       />
       <div className="flex items-start gap-2">
         <span
-          className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full text-white"
-          style={{ background: project.color }}
+          className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full"
+          style={{ background: project.color, color: inkOn(project.color) }}
         >
           <ProjectIcon icon={project.icon} className="size-3.5" />
         </span>

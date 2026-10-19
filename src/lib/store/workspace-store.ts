@@ -74,6 +74,7 @@ let timer: ReturnType<typeof setTimeout> | null = null;
 let chain: Promise<void> = Promise.resolve();
 let ignoreRemoteUntil = 0;
 let unsubscribe: (() => void) | null = null;
+let hydrateGeneration = 0;
 
 function stamp(): string {
   return new Date().toISOString();
@@ -186,10 +187,14 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   remotePending: false,
 
   hydrate: async () => {
+    const generation = ++hydrateGeneration;
     unsubscribe?.();
     unsubscribe = null;
     try {
       const bundle = await getRepository().load();
+      if (generation !== hydrateGeneration) {
+        return;
+      }
       set({ bundle, persisted: bundle, ready: true, authRequired: false, error: null, saveState: "saved" });
       if (getRepository().mode === "supabase") {
         unsubscribe = getRepository().subscribe(bundle.workspace.id, () => {
@@ -197,6 +202,9 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
         });
       }
     } catch (error) {
+      if (generation !== hydrateGeneration) {
+        return;
+      }
       if (error instanceof AuthRequiredError) {
         set({ ready: true, authRequired: true, bundle: null, error: null });
         return;

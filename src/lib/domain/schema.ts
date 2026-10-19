@@ -5,6 +5,7 @@ import {
   ICON_IDS,
   PRIORITIES,
   PROJECT_STATUSES,
+  MONEY_FLOWS,
   RELATIONS,
 } from "@/lib/domain/types";
 
@@ -23,6 +24,7 @@ export const projectInputSchema = z
     priority: z.enum(PRIORITIES),
     ownerId: z.string().uuid().nullable(),
     budget: z.number().int().nonnegative().nullable(),
+    moneyFlow: z.enum(MONEY_FLOWS),
     notes: z.string().max(4000),
   })
   .refine((value) => value.targetDate >= value.startDate, {

@@ -25,8 +25,11 @@ function member(
   return { userId, workspaceId: WORKSPACE_ID, role, displayName, email, avatarHue };
 }
 
-function project(partial: Project): Project {
-  return partial;
+function project(partial: Omit<Project, "moneyFlow"> & { moneyFlow?: Project["moneyFlow"] }): Project {
+  return {
+    ...partial,
+    moneyFlow: partial.moneyFlow ?? (partial.category === "dinero" ? "save" : "spend"),
+  };
 }
 
 function task(
@@ -102,7 +105,7 @@ export function createSeedBundle(): Bundle {
       title: "Ahorrar el enganche",
       description: "Juntar el enganche sin dejar de vivir el año.",
       category: "dinero",
-      color: "#6e8b74",
+      color: "#34A853",
       icon: "PiggyBank",
       startDate: "2026-01-01",
       targetDate: "2027-06-30",
@@ -123,7 +126,7 @@ export function createSeedBundle(): Bundle {
       title: "Comprar una casa",
       description: "Elegir un lugar con luz, cerca de un parque.",
       category: "hogar",
-      color: "#c4622d",
+      color: "#4285F4",
       icon: "House",
       startDate: "2027-07-01",
       targetDate: "2027-12-31",
@@ -144,7 +147,7 @@ export function createSeedBundle(): Bundle {
       title: "Aprender japonés",
       description: "Llegar a poder pedir comida y movernos solos.",
       category: "crecimiento",
-      color: "#3d7a8c",
+      color: "#FBBC04",
       icon: "Languages",
       startDate: "2026-10-01",
       targetDate: "2027-02-28",
@@ -165,7 +168,7 @@ export function createSeedBundle(): Bundle {
       title: "Viaje a Japón",
       description: "Dos semanas, sin prisa, en primavera.",
       category: "viaje",
-      color: "#b7893a",
+      color: "#EA4335",
       icon: "Plane",
       startDate: "2027-03-01",
       targetDate: "2027-04-30",
@@ -186,7 +189,7 @@ export function createSeedBundle(): Bundle {
       title: "Crear un pequeño negocio",
       description: "Probar una idea propia los fines de semana.",
       category: "negocio",
-      color: "#8a6278",
+      color: "#4285F4",
       icon: "Briefcase",
       startDate: "2026-11-01",
       targetDate: "2027-08-31",
@@ -207,7 +210,7 @@ export function createSeedBundle(): Bundle {
       title: "Comprar un auto",
       description: "Solo si de verdad lo necesitamos.",
       category: "personal",
-      color: "#3e4a59",
+      color: "#34A853",
       icon: "Car",
       startDate: "2026-02-01",
       targetDate: "2026-05-31",
@@ -228,7 +231,7 @@ export function createSeedBundle(): Bundle {
       title: "Fin de semana en la playa",
       description: "Un descanso corto, ya cumplido.",
       category: "evento",
-      color: "#b85c6a",
+      color: "#FBBC04",
       icon: "Sun",
       startDate: "2026-08-01",
       targetDate: "2026-08-31",
@@ -249,7 +252,7 @@ export function createSeedBundle(): Bundle {
       title: "Renovar pasaportes",
       description: "Sigue pendiente. No se marca solo como terminado.",
       category: "viaje",
-      color: "#7c8640",
+      color: "#EA4335",
       icon: "KeyRound",
       startDate: "2026-08-01",
       targetDate: "2026-09-30",

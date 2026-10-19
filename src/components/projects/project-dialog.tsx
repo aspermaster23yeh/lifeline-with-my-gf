@@ -14,10 +14,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { CATEGORY_LABEL, PRIORITY_LABEL } from "@/lib/domain/labels";
+import { CATEGORY_LABEL, MONEY_FLOW_LABEL, PRIORITY_LABEL } from "@/lib/domain/labels";
 import { firstIssue, projectInputSchema, type ProjectInput } from "@/lib/domain/schema";
 import { todayIso } from "@/lib/domain/timeline";
-import { CATEGORIES, ICON_IDS, PRIORITIES, PROJECT_COLORS } from "@/lib/domain/types";
+import { CATEGORIES, ICON_IDS, MONEY_FLOWS, PRIORITIES, PROJECT_COLORS } from "@/lib/domain/types";
 import { useUiStore } from "@/lib/store/ui-store";
 import { useWorkspaceStore } from "@/lib/store/workspace-store";
 
@@ -42,6 +42,7 @@ function defaultInput(ownerId: string): ProjectInput {
     priority: "medium",
     ownerId,
     budget: null,
+    moneyFlow: "spend",
     notes: "",
   };
 }
@@ -123,7 +124,10 @@ export function ProjectDialog() {
             <select
               className="h-8 rounded-lg border border-input bg-transparent px-2 text-sm"
               value={form.category}
-              onChange={(event) => setDraft({ ...form, category: event.target.value as ProjectInput["category"] })}
+              onChange={(event) => {
+                const category = event.target.value as ProjectInput["category"];
+                setDraft({ ...form, category, moneyFlow: category === "dinero" ? "save" : form.moneyFlow });
+              }}
               aria-label="Categoría"
             >
               {CATEGORIES.map((category) => (
@@ -169,6 +173,35 @@ export function ProjectDialog() {
                 <ProjectIcon icon={icon} className="size-4" />
               </button>
             ))}
+          </div>
+          <div className="grid grid-cols-[1fr_auto] gap-3">
+            <label className="space-y-1 text-sm">
+              <span className="text-xs text-muted-foreground">Presupuesto</span>
+              <Input
+                type="number"
+                min={0}
+                value={form.budget ?? ""}
+                placeholder="0"
+                onChange={(event) => {
+                  const raw = event.target.value.trim();
+                  const budget = raw === "" ? null : Math.max(0, Math.round(Number(raw)));
+                  setDraft({ ...form, budget: Number.isNaN(budget) ? form.budget : budget });
+                }}
+              />
+            </label>
+            <div className="grid grid-cols-1 gap-1 self-end">
+              {MONEY_FLOWS.map((flow) => (
+                <Button
+                  key={flow}
+                  type="button"
+                  size="sm"
+                  variant={form.moneyFlow === flow ? "default" : "outline"}
+                  onClick={() => setDraft({ ...form, moneyFlow: flow })}
+                >
+                  {MONEY_FLOW_LABEL[flow]}
+                </Button>
+              ))}
+            </div>
           </div>
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
           <DialogFooter>

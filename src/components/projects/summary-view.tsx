@@ -2,6 +2,7 @@
 
 import { ProjectIcon } from "@/components/icons";
 import { memberName } from "@/components/people";
+import { inkOn } from "@/lib/domain/color";
 import { CATEGORY_LABEL, STATUS_LABEL } from "@/lib/domain/labels";
 import { isOverdue, progressPercent, tasksForProject } from "@/lib/domain/progress";
 import { formatShortDate, todayIso, yearOf } from "@/lib/domain/timeline";
@@ -84,7 +85,7 @@ export function SummaryView() {
                   onClick={() => selectProject(project.id)}
                   className="flex w-full items-center gap-3 rounded-2xl border border-border bg-card px-3 py-3 text-left hover:bg-muted/60"
                 >
-                  <span className="grid size-9 shrink-0 place-items-center rounded-xl text-white" style={{ background: project.color }}>
+                  <span className="grid size-9 shrink-0 place-items-center rounded-xl" style={{ background: project.color, color: inkOn(project.color) }}>
                     <ProjectIcon icon={project.icon} className="size-4" />
                   </span>
                   <span className="min-w-0 flex-1">

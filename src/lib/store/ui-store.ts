@@ -6,7 +6,7 @@ import { persist } from "zustand/middleware";
 import type { Category } from "@/lib/domain/types";
 import type { StatusFilter } from "@/lib/domain/filters";
 
-export type MapView = "map" | "summary";
+export type MapView = "map" | "summary" | "money";
 
 export type ViewportCommand =
   | { type: "today" }

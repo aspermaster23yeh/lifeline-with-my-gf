@@ -9,13 +9,15 @@ import { TaskList } from "@/components/projects/task-list";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { CATEGORY_LABEL, PRIORITY_LABEL, RELATION_LABEL, STATUS_LABEL } from "@/lib/domain/labels";
+import { inkOn } from "@/lib/domain/color";
+import { CATEGORY_LABEL, MONEY_FLOW_LABEL, PRIORITY_LABEL, RELATION_LABEL, STATUS_LABEL } from "@/lib/domain/labels";
 import { isOverdue, progressPercent, tasksForProject } from "@/lib/domain/progress";
 import { formatLongDate, todayIso } from "@/lib/domain/timeline";
 import { timeAgo } from "@/components/people";
 import {
   CATEGORIES,
   ICON_IDS,
+  MONEY_FLOWS,
   PRIORITIES,
   PROJECT_COLORS,
   PROJECT_STATUSES,
@@ -57,7 +59,7 @@ export function DetailPanel() {
   return (
     <aside className="flex h-full w-full flex-col border-l border-border bg-sidebar md:w-[380px]">
       <div className="flex items-start gap-3 border-b border-border px-4 py-4">
-        <span className="grid size-10 shrink-0 place-items-center rounded-2xl text-white" style={{ background: project.color }}>
+        <span className="grid size-10 shrink-0 place-items-center rounded-2xl" style={{ background: project.color, color: inkOn(project.color) }}>
           <ProjectIcon icon={project.icon} className="size-5" />
         </span>
         <div className="min-w-0 flex-1">
@@ -246,26 +248,41 @@ export function DetailPanel() {
             ))}
           </select>
         </label>
-        <label className="block space-y-1 text-sm">
-          <span className="text-xs text-muted-foreground">Presupuesto</span>
-          <Input
-            type="number"
-            min={0}
-            defaultValue={project.budget ?? ""}
-            key={String(project.budget)}
-            placeholder={currency(null)}
-            onBlur={(event) => {
-              const raw = event.target.value.trim();
-              const budget = raw === "" ? null : Math.max(0, Math.round(Number(raw)));
-              if (Number.isNaN(budget)) {
-                return;
-              }
-              if (budget !== project.budget) {
-                updateDetails(project.id, { budget });
-              }
-            }}
-          />
-        </label>
+        <div className="space-y-2">
+          <label className="block space-y-1 text-sm">
+            <span className="text-xs text-muted-foreground">Presupuesto</span>
+            <Input
+              type="number"
+              min={0}
+              defaultValue={project.budget ?? ""}
+              key={String(project.budget)}
+              placeholder={currency(null)}
+              onBlur={(event) => {
+                const raw = event.target.value.trim();
+                const budget = raw === "" ? null : Math.max(0, Math.round(Number(raw)));
+                if (Number.isNaN(budget)) {
+                  return;
+                }
+                if (budget !== project.budget) {
+                  updateDetails(project.id, { budget });
+                }
+              }}
+            />
+          </label>
+          <div className="grid grid-cols-2 gap-1 rounded-xl bg-muted p-1">
+            {MONEY_FLOWS.map((flow) => (
+              <Button
+                key={flow}
+                type="button"
+                size="sm"
+                variant={project.moneyFlow === flow ? "default" : "ghost"}
+                onClick={() => updateDetails(project.id, { moneyFlow: flow })}
+              >
+                {MONEY_FLOW_LABEL[flow]}
+              </Button>
+            ))}
+          </div>
+        </div>
         <section className="space-y-2">
           <h3 className="text-sm font-medium">Conexiones</h3>
           {connections.length === 0 ? <p className="text-sm text-muted-foreground">Arrastra desde el punto de una tarjeta hacia otra.</p> : null}

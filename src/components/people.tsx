@@ -4,6 +4,7 @@ import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { googleColor, inkOn } from "@/lib/domain/color";
 import type { Member } from "@/lib/domain/types";
 
 export function initials(name: string): string {
@@ -14,7 +15,7 @@ export function initials(name: string): string {
 export function MemberAvatar({ member, className }: { member: Member; className?: string }) {
   return (
     <Avatar className={className} title={member.displayName}>
-      <AvatarFallback style={{ backgroundColor: `oklch(0.75 0.08 ${member.avatarHue})` }}>
+      <AvatarFallback style={{ backgroundColor: googleColor(member.userId), color: inkOn(googleColor(member.userId)) }}>
         {initials(member.displayName)}
       </AvatarFallback>
     </Avatar>

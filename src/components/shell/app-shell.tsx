@@ -3,6 +3,7 @@
 import { LifeMap } from "@/components/canvas/life-map";
 import { DetailPanel } from "@/components/projects/detail-panel";
 import { ProjectDialog } from "@/components/projects/project-dialog";
+import { MoneyView } from "@/components/projects/money-view";
 import { SummaryView } from "@/components/projects/summary-view";
 import { DeleteDialog } from "@/components/shell/delete-dialog";
 import { Sidebar } from "@/components/shell/sidebar";
@@ -85,6 +86,9 @@ export function AppShell() {
       if (event.key === "2") {
         setView("summary");
       }
+      if (event.key === "3") {
+        setView("money");
+      }
       if (event.key === "+" || event.key === "=") {
         requestViewport({ type: "zoom-in" });
       }
@@ -124,7 +128,7 @@ export function AppShell() {
           </SheetContent>
         </Sheet>
         <main className="flex min-w-0 flex-1">
-          {view === "map" ? <LifeMap /> : <SummaryView />}
+          {view === "map" ? <LifeMap /> : view === "money" ? <MoneyView /> : <SummaryView />}
           {selectedId && roomForPanel ? <DetailPanel key={selectedId} /> : null}
         </main>
       </div>
