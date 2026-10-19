@@ -93,6 +93,7 @@ export function Sidebar() {
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm">{project.title}</span>
                       <span className="block text-[11px] text-muted-foreground">
+                        {project.kind === "activity" ? "Actividad · " : ""}
                         {STATUS_LABEL[project.status]}
                         {overdue ? " · Vencido" : ""} · {progressPercent(tasks)}%
                       </span>

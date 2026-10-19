@@ -8,6 +8,7 @@ import type {
   CanvasLayout,
   HistoryEntry,
   Invitation,
+  LifestyleCost,
   Member,
   Project,
   ProjectConnection,
@@ -74,6 +75,7 @@ function projectPayload(project: Project) {
     notes: project.notes,
     budget: project.budget,
     money_flow: project.moneyFlow === "save" ? "save" : "spend",
+    kind: project.kind === "activity" ? "activity" : "project",
   };
 }
 
@@ -125,7 +127,7 @@ export class SupabaseRepository implements LifeMapRepository {
       assertNoError(ownerError);
     }
 
-    const [workspaceRes, membersRes, projectsRes, tasksRes, connectionsRes, layoutsRes, historyRes, invitationsRes] =
+    const [workspaceRes, membersRes, projectsRes, tasksRes, connectionsRes, layoutsRes, historyRes, invitationsRes, lifestyleRes] =
       await Promise.all([
         supabase.from("workspaces").select("*").eq("id", workspaceId).single(),
         supabase
@@ -145,6 +147,7 @@ export class SupabaseRepository implements LifeMapRepository {
           .eq("projects.workspace_id", workspaceId)
           .order("created_at", { ascending: false }),
         supabase.from("workspace_invitations").select("*").eq("workspace_id", workspaceId),
+        supabase.from("lifestyle_costs").select("*").eq("workspace_id", workspaceId).order("created_at"),
       ]);
 
     assertNoError(workspaceRes.error);
@@ -155,6 +158,7 @@ export class SupabaseRepository implements LifeMapRepository {
     assertNoError(layoutsRes.error);
     assertNoError(historyRes.error);
     assertNoError(invitationsRes.error);
+    assertNoError(lifestyleRes.error);
 
     const workspaceRow = workspaceRes.data as {
       id: string;
@@ -181,6 +185,7 @@ export class SupabaseRepository implements LifeMapRepository {
       layouts: ((layoutsRes.data ?? []) as LayoutRow[]).map(mapLayout),
       history: ((historyRes.data ?? []) as HistoryRow[]).map(mapHistory),
       invitations: ((invitationsRes.data ?? []) as InvitationRow[]).map(mapInvitation),
+      lifestyle: ((lifestyleRes.data ?? []) as LifestyleRow[]).map(mapLifestyle),
     };
   }
 
@@ -193,6 +198,7 @@ export class SupabaseRepository implements LifeMapRepository {
     await diffLayouts(supabase, next, baseline, stamps);
     await diffHistory(supabase, next, baseline);
     await diffInvitations(supabase, next, baseline);
+    await diffLifestyle(supabase, next, baseline);
     if (next.workspace.name !== baseline.workspace.name) {
       await updateIfCurrent(
         supabase,
@@ -208,6 +214,7 @@ export class SupabaseRepository implements LifeMapRepository {
     await deleteMissing(supabase, "project_connections", baseline.connections, next.connections);
     await deleteMissing(supabase, "canvas_layouts", baseline.layouts, next.layouts, "project_id");
     await deleteMissing(supabase, "projects", baseline.projects, next.projects);
+    await deleteMissing(supabase, "lifestyle_costs", baseline.lifestyle ?? [], next.lifestyle ?? []);
     return applyStamps(next, stamps);
   }
 
@@ -236,6 +243,11 @@ export class SupabaseRepository implements LifeMapRepository {
           table: "workspace_invitations",
           filter: `workspace_id=eq.${workspaceId}`,
         },
+        onRemote,
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "lifestyle_costs", filter: `workspace_id=eq.${workspaceId}` },
         onRemote,
       )
       .subscribe();
@@ -445,6 +457,38 @@ async function diffHistory(supabase: SupabaseClient, next: Bundle, baseline: Bun
   assertNoError(error);
 }
 
+async function diffLifestyle(supabase: SupabaseClient, next: Bundle, baseline: Bundle): Promise<void> {
+  const previous = new Map((baseline.lifestyle ?? []).map((item) => [item.id, item]));
+  const fresh = [];
+  for (const item of next.lifestyle ?? []) {
+    const before = previous.get(item.id);
+    if (!before) {
+      fresh.push(item);
+      continue;
+    }
+    if (before.name === item.name && before.monthlyAmount === item.monthlyAmount) {
+      continue;
+    }
+    const { error } = await supabase
+      .from("lifestyle_costs")
+      .update({ name: item.name, monthly_amount: item.monthlyAmount })
+      .eq("id", item.id);
+    assertNoError(error);
+  }
+  if (fresh.length === 0) {
+    return;
+  }
+  const { error } = await supabase.from("lifestyle_costs").insert(
+    fresh.map((item) => ({
+      id: item.id,
+      workspace_id: item.workspaceId,
+      name: item.name,
+      monthly_amount: item.monthlyAmount,
+    })),
+  );
+  assertNoError(error);
+}
+
 async function diffInvitations(supabase: SupabaseClient, next: Bundle, baseline: Bundle): Promise<void> {
   const known = new Set(baseline.invitations.map((invitation) => invitation.id));
   const fresh = next.invitations.filter((invitation) => !known.has(invitation.id));
@@ -536,6 +580,7 @@ type ProjectRow = {
   notes: string;
   budget: number | null;
   money_flow?: string | null;
+  kind?: string | null;
   created_at: string;
   updated_at: string;
   created_by: string;
@@ -623,9 +668,30 @@ function mapProject(row: ProjectRow): Project {
     notes: row.notes,
     budget: row.budget === null ? null : Number(row.budget),
     moneyFlow: row.money_flow === "save" ? "save" : "spend",
+    kind: row.kind === "activity" ? "activity" : "project",
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     createdBy: row.created_by,
+  };
+}
+
+type LifestyleRow = {
+  id: string;
+  workspace_id: string;
+  name: string;
+  monthly_amount: number;
+  created_at: string;
+  updated_at: string;
+};
+
+function mapLifestyle(row: LifestyleRow): LifestyleCost {
+  return {
+    id: row.id,
+    workspaceId: row.workspace_id,
+    name: row.name,
+    monthlyAmount: Number(row.monthly_amount),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
 

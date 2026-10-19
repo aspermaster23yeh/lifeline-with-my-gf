@@ -1,5 +1,5 @@
 import { parseDay } from "@/lib/domain/timeline";
-import type { MoneyFlow, Project } from "@/lib/domain/types";
+import type { LifestyleCost, MoneyFlow, Project } from "@/lib/domain/types";
 
 export type MonthKey = { year: number; month: number };
 
@@ -38,6 +38,10 @@ export function monthsCovered(startDate: string, targetDate: string): MonthKey[]
     cursor.setMonth(cursor.getMonth() + 1);
   }
   return months;
+}
+
+export function lifestyleMonthly(items: LifestyleCost[]): number {
+  return items.reduce((total, item) => total + Math.max(0, item.monthlyAmount), 0);
 }
 
 function roundPeso(value: number): number {

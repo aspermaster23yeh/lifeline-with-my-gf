@@ -10,13 +10,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { inkOn } from "@/lib/domain/color";
-import { CATEGORY_LABEL, MONEY_FLOW_LABEL, PRIORITY_LABEL, RELATION_LABEL, STATUS_LABEL } from "@/lib/domain/labels";
+import { CATEGORY_LABEL, ITEM_KIND_LABEL, MONEY_FLOW_LABEL, PRIORITY_LABEL, RELATION_LABEL, STATUS_LABEL } from "@/lib/domain/labels";
 import { isOverdue, progressPercent, tasksForProject } from "@/lib/domain/progress";
 import { formatLongDate, todayIso } from "@/lib/domain/timeline";
 import { timeAgo } from "@/components/people";
 import {
   CATEGORIES,
   ICON_IDS,
+  ITEM_KINDS,
   MONEY_FLOWS,
   PRIORITIES,
   PROJECT_COLORS,
@@ -269,6 +270,19 @@ export function DetailPanel() {
               }}
             />
           </label>
+          <div className="grid grid-cols-2 gap-1 rounded-xl bg-muted p-1">
+            {ITEM_KINDS.map((kind) => (
+              <Button
+                key={kind}
+                type="button"
+                size="sm"
+                variant={project.kind === kind ? "default" : "ghost"}
+                onClick={() => updateDetails(project.id, { kind })}
+              >
+                {ITEM_KIND_LABEL[kind]}
+              </Button>
+            ))}
+          </div>
           <div className="grid grid-cols-2 gap-1 rounded-xl bg-muted p-1">
             {MONEY_FLOWS.map((flow) => (
               <Button

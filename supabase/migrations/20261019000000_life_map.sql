@@ -70,11 +70,21 @@ create table public.projects (
   notes text not null default '',
   budget numeric(12, 2),
   money_flow text not null default 'spend' check (money_flow in ('spend', 'save')),
+  kind text not null default 'project' check (kind in ('project', 'activity')),
   created_by uuid not null references public.profiles (id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint projects_dates check (target_date >= start_date),
   constraint projects_budget check (budget is null or budget >= 0)
+);
+
+create table public.lifestyle_costs (
+  id uuid primary key default gen_random_uuid(),
+  workspace_id uuid not null references public.workspaces (id) on delete cascade,
+  name text not null check (char_length(btrim(name)) between 1 and 80),
+  monthly_amount integer not null check (monthly_amount >= 0),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
 
 create table public.tasks (
@@ -124,6 +134,7 @@ create index connections_workspace_idx on public.project_connections (workspace_
 create index history_project_created_idx on public.project_history (project_id, created_at desc);
 create index members_user_idx on public.workspace_members (user_id);
 create index invitations_email_idx on public.workspace_invitations (lower(email));
+create index lifestyle_workspace_idx on public.lifestyle_costs (workspace_id, created_at);
 
 create or replace function private.is_member(target_workspace uuid)
 returns boolean
@@ -266,6 +277,8 @@ create trigger tasks_touch before update on public.tasks
   for each row execute function private.set_updated_at();
 create trigger layouts_touch before update on public.canvas_layouts
   for each row execute function private.set_updated_at();
+create trigger lifestyle_touch before update on public.lifestyle_costs
+  for each row execute function private.set_updated_at();
 
 alter table public.profiles enable row level security;
 alter table public.workspaces enable row level security;
@@ -276,6 +289,7 @@ alter table public.tasks enable row level security;
 alter table public.project_connections enable row level security;
 alter table public.canvas_layouts enable row level security;
 alter table public.project_history enable row level security;
+alter table public.lifestyle_costs enable row level security;
 
 create policy profiles_select on public.profiles
   for select to authenticated
@@ -401,6 +415,20 @@ create policy projects_delete on public.projects
   for delete to authenticated
   using (private.is_member(workspace_id));
 
+create policy lifestyle_select on public.lifestyle_costs
+  for select to authenticated
+  using (private.is_member(workspace_id));
+create policy lifestyle_insert on public.lifestyle_costs
+  for insert to authenticated
+  with check (private.is_member(workspace_id));
+create policy lifestyle_update on public.lifestyle_costs
+  for update to authenticated
+  using (private.is_member(workspace_id))
+  with check (private.is_member(workspace_id));
+create policy lifestyle_delete on public.lifestyle_costs
+  for delete to authenticated
+  using (private.is_member(workspace_id));
+
 do $$
 begin
   if exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
@@ -410,7 +438,8 @@ begin
       public.project_connections,
       public.canvas_layouts,
       public.project_history,
-      public.workspace_invitations;
+      public.workspace_invitations,
+      public.lifestyle_costs;
   end if;
 end $$;
 
@@ -423,7 +452,8 @@ revoke all on table
   public.tasks,
   public.project_connections,
   public.canvas_layouts,
-  public.project_history
+  public.project_history,
+  public.lifestyle_costs
 from anon, public;
 
 grant select, insert, update, delete on table
@@ -435,5 +465,6 @@ grant select, insert, update, delete on table
   public.tasks,
   public.project_connections,
   public.canvas_layouts,
-  public.project_history
+  public.project_history,
+  public.lifestyle_costs
 to authenticated;

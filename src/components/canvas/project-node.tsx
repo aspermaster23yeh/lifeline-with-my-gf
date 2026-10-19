@@ -67,7 +67,10 @@ export function ProjectNode({ data, selected }: NodeProps<ProjectFlowNode>) {
           <ProjectIcon icon={project.icon} className="size-3.5" />
         </span>
         <div className="min-w-0">
-          <h3 className="truncate text-[13px] font-semibold tracking-tight">{project.title}</h3>
+          <h3 className="truncate text-[13px] font-semibold tracking-tight">
+            {project.kind === "activity" ? "Actividad · " : ""}
+            {project.title}
+          </h3>
           <p className="truncate text-[11px] text-muted-foreground">
             {formatShortDate(project.startDate)} — {formatShortDate(project.targetDate)}
           </p>

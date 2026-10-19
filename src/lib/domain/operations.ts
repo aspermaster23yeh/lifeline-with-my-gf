@@ -6,6 +6,7 @@ import type {
   HistoryEntry,
   HistoryKind,
   Invitation,
+  LifestyleCost,
   Priority,
   Project,
   ProjectConnection,
@@ -13,7 +14,7 @@ import type {
   RelationKind,
   Task,
 } from "@/lib/domain/types";
-import type { ProjectInput, TaskInput } from "@/lib/domain/schema";
+import type { LifestyleInput, ProjectInput, TaskInput } from "@/lib/domain/schema";
 
 export function createId(): string {
   return crypto.randomUUID();
@@ -82,6 +83,7 @@ export function createProject(
     notes: input.notes,
     budget: input.budget,
     moneyFlow: input.moneyFlow,
+    kind: input.kind,
     createdAt: now,
     updatedAt: now,
     createdBy: bundle.viewerId,
@@ -96,7 +98,7 @@ export function createProject(
     projects: [...bundle.projects, project],
     layouts: [...bundle.layouts, layout],
     history: [
-      historyEntry(projectId, bundle.viewerId, "created", "Proyecto creado", {}, now, historyId),
+      historyEntry(projectId, bundle.viewerId, "created", input.kind === "activity" ? "Actividad creada" : "Proyecto creado", {}, now, historyId),
       ...bundle.history,
     ],
   };
@@ -118,6 +120,7 @@ export function updateProjectDetails(
       | "notes"
       | "budget"
       | "moneyFlow"
+      | "kind"
     >
   >,
   now: string,
@@ -443,4 +446,32 @@ export function inviteByEmail(
 
 export function setPriority(bundle: Bundle, projectId: string, priority: Priority, now: string): Bundle {
   return updateProjectDetails(bundle, projectId, { priority }, now);
+}
+
+export function addLifestyle(bundle: Bundle, input: LifestyleInput, now: string, id: string): Bundle {
+  const item: LifestyleCost = {
+    id,
+    workspaceId: bundle.workspace.id,
+    name: input.name.trim(),
+    monthlyAmount: input.monthlyAmount,
+    createdAt: now,
+    updatedAt: now,
+  };
+  return { ...bundle, lifestyle: [...bundle.lifestyle, item] };
+}
+
+export function updateLifestyle(
+  bundle: Bundle,
+  id: string,
+  patch: Partial<Pick<LifestyleCost, "name" | "monthlyAmount">>,
+  now: string,
+): Bundle {
+  return {
+    ...bundle,
+    lifestyle: bundle.lifestyle.map((item) => (item.id === id ? { ...item, ...patch, updatedAt: now } : item)),
+  };
+}
+
+export function removeLifestyle(bundle: Bundle, id: string): Bundle {
+  return { ...bundle, lifestyle: bundle.lifestyle.filter((item) => item.id !== id) };
 }

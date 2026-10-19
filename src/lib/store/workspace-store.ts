@@ -8,6 +8,7 @@ import { resetLocalMap } from "@/lib/data/local-repository";
 import { AuthRequiredError, ConflictError } from "@/lib/data/repository";
 import type { InvitationResult } from "@/lib/data/repository";
 import {
+  addLifestyle,
   addTask,
   changeStatus,
   connectProjects,
@@ -17,6 +18,7 @@ import {
   deleteTask,
   inviteByEmail,
   placeProject,
+  removeLifestyle,
   renameWorkspace,
   reorderTasks,
   toggleTask,
@@ -25,8 +27,8 @@ import {
   updateTask,
   createId,
 } from "@/lib/domain/operations";
-import { firstIssue, invitationSchema, projectInputSchema, taskInputSchema } from "@/lib/domain/schema";
-import type { ProjectInput, TaskInput } from "@/lib/domain/schema";
+import { firstIssue, invitationSchema, lifestyleInputSchema, projectInputSchema, taskInputSchema } from "@/lib/domain/schema";
+import type { LifestyleInput, ProjectInput, TaskInput } from "@/lib/domain/schema";
 import type { Bundle, ProjectStatus, RelationKind } from "@/lib/domain/types";
 
 type SaveState = "idle" | "saving" | "saved" | "error";
@@ -64,6 +66,8 @@ type WorkspaceState = {
   setRelation: (connectionId: string, relation: RelationKind) => void;
   removeConnection: (connectionId: string) => void;
   renameWorkspace: (name: string) => void;
+  addLifestyleCost: (input: LifestyleInput) => void;
+  removeLifestyleCost: (id: string) => void;
   invite: (email: string) => string | null;
   restoreExample: () => void;
   signOut: () => Promise<void>;
@@ -310,6 +314,19 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
 
   renameWorkspace: (name) => {
     commit("renombrar espacio", (bundle) => renameWorkspace(bundle, name, stamp()));
+  },
+
+  addLifestyleCost: (input) => {
+    const parsed = lifestyleInputSchema.safeParse(input);
+    if (!parsed.success) {
+      toast.error(firstIssue(parsed.error));
+      return;
+    }
+    commit("agregar gasto de vida", (bundle) => addLifestyle(bundle, parsed.data, stamp(), createId()));
+  },
+
+  removeLifestyleCost: (id) => {
+    commit("quitar gasto de vida", (bundle) => removeLifestyle(bundle, id));
   },
 
   invite: (email) => {

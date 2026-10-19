@@ -25,6 +25,8 @@ export const TASK_STATUSES = ["open", "done"] as const;
 
 export const MONEY_FLOWS = ["spend", "save"] as const;
 
+export const ITEM_KINDS = ["project", "activity"] as const;
+
 export const ICON_IDS = [
   "House",
   "PiggyBank",
@@ -53,6 +55,7 @@ export type Category = (typeof CATEGORIES)[number];
 export type RelationKind = (typeof RELATIONS)[number];
 export type TaskStatus = (typeof TASK_STATUSES)[number];
 export type MoneyFlow = (typeof MONEY_FLOWS)[number];
+export type ItemKind = (typeof ITEM_KINDS)[number];
 export type IconId = (typeof ICON_IDS)[number];
 
 export type Workspace = {
@@ -90,6 +93,7 @@ export type Project = {
   notes: string;
   budget: number | null;
   moneyFlow: MoneyFlow;
+  kind: ItemKind;
   createdAt: string;
   updatedAt: string;
   createdBy: string;
@@ -136,6 +140,15 @@ export type HistoryEntry = {
   createdAt: string;
 };
 
+export type LifestyleCost = {
+  id: string;
+  workspaceId: string;
+  name: string;
+  monthlyAmount: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type Invitation = {
   id: string;
   workspaceId: string;
@@ -156,5 +169,6 @@ export type Bundle = {
   layouts: CanvasLayout[];
   history: HistoryEntry[];
   invitations: Invitation[];
+  lifestyle: LifestyleCost[];
   viewerId: string;
 };

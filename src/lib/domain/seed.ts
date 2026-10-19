@@ -1,4 +1,4 @@
-import type { Bundle, HistoryEntry, Member, Project, Task } from "@/lib/domain/types";
+import type { Bundle, HistoryEntry, LifestyleCost, Member, Project, Task } from "@/lib/domain/types";
 
 export const VIEWER_ID = "00000000-0000-4000-8000-000000000001";
 export const PARTNER_ID = "00000000-0000-4000-8000-000000000002";
@@ -25,10 +25,15 @@ function member(
   return { userId, workspaceId: WORKSPACE_ID, role, displayName, email, avatarHue };
 }
 
-function project(partial: Omit<Project, "moneyFlow"> & { moneyFlow?: Project["moneyFlow"] }): Project {
+function cost(id: string, name: string, monthlyAmount: number): LifestyleCost {
+  return { id, workspaceId: WORKSPACE_ID, name, monthlyAmount, createdAt: SEEDED_AT, updatedAt: SEEDED_AT };
+}
+
+function project(partial: Omit<Project, "moneyFlow" | "kind"> & Partial<Pick<Project, "moneyFlow" | "kind">>): Project {
   return {
     ...partial,
     moneyFlow: partial.moneyFlow ?? (partial.category === "dinero" ? "save" : "spend"),
+    kind: partial.kind ?? "project",
   };
 }
 
@@ -92,6 +97,7 @@ export function emptyBundle(now = SEEDED_AT): Bundle {
     layouts: [],
     history: [],
     invitations: [],
+    lifestyle: [],
     viewerId: VIEWER_ID,
   };
 }
@@ -231,6 +237,7 @@ export function createSeedBundle(): Bundle {
       title: "Fin de semana en la playa",
       description: "Un descanso corto, ya cumplido.",
       category: "evento",
+      kind: "activity",
       color: "#FBBC04",
       icon: "Sun",
       startDate: "2026-08-01",
@@ -290,6 +297,11 @@ export function createSeedBundle(): Bundle {
   return {
     ...base,
     projects,
+    lifestyle: [
+      cost("00000000-0000-4000-8000-000000000501", "Renta", 12000),
+      cost("00000000-0000-4000-8000-000000000502", "Comida", 8000),
+      cost("00000000-0000-4000-8000-000000000503", "Salidas", 2500),
+    ],
     tasks: [
       task("00000000-0000-4000-8000-000000000301", SAVINGS_ID, "Abrir la cuenta de enganche", 0, true),
       task("00000000-0000-4000-8000-000000000302", SAVINGS_ID, "Automatizar la transferencia", 1, true),

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { monthsCovered, summarizeMoney } from "@/lib/domain/money";
+import { lifestyleMonthly, monthsCovered, summarizeMoney } from "@/lib/domain/money";
 import type { Project } from "@/lib/domain/types";
 
 function plan(partial: Pick<Project, "id" | "title" | "startDate" | "targetDate" | "budget" | "moneyFlow" | "status" | "category">): Project {
@@ -14,6 +14,7 @@ function plan(partial: Pick<Project, "id" | "title" | "startDate" | "targetDate"
     priority: "medium",
     ownerId: null,
     notes: "",
+    kind: "project",
     createdAt: "2026-01-01T00:00:00.000Z",
     updatedAt: "2026-01-01T00:00:00.000Z",
     createdBy: "u",
@@ -70,5 +71,28 @@ describe("money", () => {
     expect(year2027?.perMonth).toBe(7500);
     expect(year2027?.months[2]?.spend).toBe(45000);
     expect(year2027?.months[0]?.save).toBe(10000);
+  });
+
+  it("suma el estilo de vida al mes y deja las actividades dentro del gasto", () => {
+    expect(
+      lifestyleMonthly([
+        { id: "a", workspaceId: "w", name: "Renta", monthlyAmount: 12000, createdAt: "", updatedAt: "" },
+        { id: "b", workspaceId: "w", name: "Comida", monthlyAmount: 8000, createdAt: "", updatedAt: "" },
+      ]),
+    ).toBe(20000);
+
+    const summary = summarizeMoney([
+      plan({
+        id: "dinner",
+        title: "Cena",
+        category: "evento",
+        moneyFlow: "spend",
+        status: "planned",
+        startDate: "2026-06-01",
+        targetDate: "2026-06-01",
+        budget: 1800,
+      }),
+    ]);
+    expect(summary.spend).toBe(1800);
   });
 });

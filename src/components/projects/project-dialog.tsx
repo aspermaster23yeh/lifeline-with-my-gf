@@ -14,10 +14,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { CATEGORY_LABEL, MONEY_FLOW_LABEL, PRIORITY_LABEL } from "@/lib/domain/labels";
+import { CATEGORY_LABEL, ITEM_KIND_LABEL, MONEY_FLOW_LABEL, PRIORITY_LABEL } from "@/lib/domain/labels";
 import { firstIssue, projectInputSchema, type ProjectInput } from "@/lib/domain/schema";
 import { todayIso } from "@/lib/domain/timeline";
-import { CATEGORIES, ICON_IDS, MONEY_FLOWS, PRIORITIES, PROJECT_COLORS } from "@/lib/domain/types";
+import { CATEGORIES, ICON_IDS, ITEM_KINDS, MONEY_FLOWS, PRIORITIES, PROJECT_COLORS } from "@/lib/domain/types";
 import { useUiStore } from "@/lib/store/ui-store";
 import { useWorkspaceStore } from "@/lib/store/workspace-store";
 
@@ -43,6 +43,7 @@ function defaultInput(ownerId: string): ProjectInput {
     ownerId,
     budget: null,
     moneyFlow: "spend",
+    kind: "project",
     notes: "",
   };
 }
@@ -75,8 +76,12 @@ export function ProjectDialog() {
     >
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Nuevo proyecto</DialogTitle>
-          <DialogDescription>El bloque ocupará los meses reales entre el inicio y la fecha objetivo.</DialogDescription>
+          <DialogTitle>{form.kind === "activity" ? "Nueva actividad" : "Nuevo proyecto"}</DialogTitle>
+          <DialogDescription>
+            {form.kind === "activity"
+              ? "Algo que van a hacer, como una cena, un curso o un fin de semana."
+              : "El bloque ocupará los meses reales entre el inicio y la fecha objetivo."}
+          </DialogDescription>
         </DialogHeader>
         <form
           className="space-y-3"
@@ -97,6 +102,19 @@ export function ProjectDialog() {
             requestViewport({ type: "project", projectId: id });
           }}
         >
+          <div className="grid grid-cols-2 gap-1 rounded-xl bg-muted p-1">
+            {ITEM_KINDS.map((kind) => (
+              <Button
+                key={kind}
+                type="button"
+                size="sm"
+                variant={form.kind === kind ? "default" : "ghost"}
+                onClick={() => setDraft({ ...form, kind })}
+              >
+                {ITEM_KIND_LABEL[kind]}
+              </Button>
+            ))}
+          </div>
           <Input
             value={form.title}
             onChange={(event) => setDraft({ ...form, title: event.target.value })}

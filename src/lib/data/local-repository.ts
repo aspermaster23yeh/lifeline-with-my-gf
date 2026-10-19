@@ -1,6 +1,6 @@
 import { migrateProjectColor } from "@/lib/domain/color";
 import { createSeedBundle } from "@/lib/domain/seed";
-import type { Bundle } from "@/lib/domain/types";
+import type { Bundle, Project } from "@/lib/domain/types";
 import type { InvitationResult, LifeMapRepository, SignUpResult } from "@/lib/data/repository";
 
 const STORAGE_KEY = "our-life-map.v1";
@@ -46,10 +46,17 @@ export class LocalRepository implements LifeMapRepository {
       if (!isBundle(parsed)) {
         throw new Error("Formato local inválido.");
       }
-      const projects = parsed.projects.map((project) => ({ ...project, color: migrateProjectColor(project.color) }));
-      const next = projects.some((project, index) => project.color !== parsed.projects[index]?.color)
-        ? { ...parsed, projects }
-        : parsed;
+      const projects: Project[] = parsed.projects.map((project) => ({
+        ...project,
+        color: migrateProjectColor(project.color),
+        kind: project.kind === "activity" ? "activity" : "project",
+        moneyFlow: project.moneyFlow === "save" ? "save" : "spend",
+      }));
+      const lifestyle = Array.isArray(parsed.lifestyle) ? parsed.lifestyle : [];
+      const changed =
+        lifestyle !== parsed.lifestyle ||
+        projects.some((project, index) => project.color !== parsed.projects[index]?.color || project.kind !== parsed.projects[index]?.kind);
+      const next = changed ? { ...parsed, projects, lifestyle } : parsed;
       if (next !== parsed) {
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
       }

@@ -25,6 +25,11 @@ export const CATEGORY_LABEL: Record<Category, string> = {
   personal: "Personal",
 };
 
+export const ITEM_KIND_LABEL = {
+  project: "Proyecto",
+  activity: "Actividad",
+} as const;
+
 export const MONEY_FLOW_LABEL: Record<MoneyFlow, string> = {
   save: "Ahorro",
   spend: "Gasto",
