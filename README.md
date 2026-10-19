@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Our Life Map
 
-## Getting Started
+Un mapa del tiempo para dos personas. Los meses son columnas reales del calendario y los proyectos ocupan el periodo entre su fecha de inicio y su fecha objetivo.
 
-First, run the development server:
+## Cómo está armado
+
+- Las fechas son la fuente de verdad. `src/lib/domain/timeline.ts` convierte una fecha a una coordenada horizontal y al revés. La fila vertical vive aparte, en `canvas_layouts`.
+- El lienzo usa React Flow para arrastrar, redimensionar y conectar. Al soltar una tarjeta, el desplazamiento horizontal se traduce a meses de calendario y actualiza las fechas. Las tareas, las notas y el progreso se quedan.
+- El progreso es `tareas completadas / tareas totales`. Un proyecto vencido no pasa solo a completado ni a cancelado.
+- Deshacer y rehacer cubren las ediciones de esta sesión.
+- Los datos pasan por un repositorio. Sin variables de Supabase, se usa un adaptador local en `localStorage`. Ese modo no sincroniza a otra persona y la interfaz lo dice.
+
+## Modo local
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000). El ejemplo incluye proyectos, tareas y conexiones. “Pareja” es un participante de ejemplo, no una sesión en vivo.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Supabase
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Hace falta un proyecto de Supabase. No hay claves en este repositorio.
 
-## Learn More
+1. Crea un proyecto en [Supabase](https://supabase.com/dashboard).
+2. En Authentication, activa email y contraseña. Define la Site URL de la app para los correos de confirmación.
+3. Copia `.env.example` a `.env.local` y llena:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://<ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<clave publica>
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+La clave `anon` legacy también se acepta como `NEXT_PUBLIC_SUPABASE_ANON_KEY`. No pongas la clave `service_role` en el cliente.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+4. Aplica la migración `supabase/migrations/20261019000000_life_map.sql` con el CLI:
 
-## Deploy on Vercel
+```bash
+npx supabase login
+npx supabase link --project-ref <ref>
+npx supabase db push
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+La migración crea las tablas, las políticas de Row Level Security y, si existe la publicación `supabase_realtime`, suscribe los cambios. En el dashboard, confirma que Realtime esté activo para `projects`, `tasks`, `project_connections`, `canvas_layouts`, `project_history` y `workspace_invitations`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Con las variables presentes, la app pide cuenta. Quien crea la primera sesión obtiene un espacio. La otra persona entra con el correo invitado y abre `/invite/<token>`.
+
+Los updates comparan `updated_at`. Si alguien más guardó esa fila, el mapa se recarga en lugar de pisar el cambio.
+
+## Scripts
+
+```bash
+npm run test
+npm run typecheck
+npm run lint
+npm run build
+```
+
+## Fuera de este MVP
+
+Fotos, archivos, PDF, plantillas, recordatorios, estadísticas e inteligencia artificial no están en la interfaz. El esquema relacional deja sitio para sumarlos después sin convertir la app en un único JSON.
