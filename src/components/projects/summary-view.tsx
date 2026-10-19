@@ -39,7 +39,7 @@ export function SummaryView() {
           <h2 className="font-display text-3xl tracking-tight">Resumen</h2>
           <p className="text-sm text-muted-foreground">{projects.length} proyectos con los mismos datos del mapa.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex max-w-full flex-wrap gap-2">
           <select
             className="h-8 rounded-lg border border-input bg-transparent px-2 text-sm"
             value={year === "all" ? "all" : String(year)}
@@ -101,7 +101,7 @@ export function SummaryView() {
                       <span className="block h-full" style={{ width: `${progress}%`, background: project.color }} />
                     </span>
                   </span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="shrink-0 text-right text-xs text-muted-foreground">
                     {STATUS_LABEL[project.status]}
                     {overdue ? " · Vencido" : ""}
                   </span>

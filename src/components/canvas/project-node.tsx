@@ -83,7 +83,7 @@ export function ProjectNode({ data, selected }: NodeProps<ProjectFlowNode>) {
         <span className="text-[10px] tabular-nums text-muted-foreground">
           {done}/{related.length || 0}
         </span>
-        <span className="text-[10px] text-muted-foreground">{STATUS_LABEL[project.status]}</span>
+        <span className="truncate text-[10px] text-muted-foreground">{STATUS_LABEL[project.status]}</span>
         {overdue ? <span className="text-[10px] font-medium text-[var(--today)]">Vencido</span> : null}
       </div>
       {showOriginal && project.originalTargetDate && project.originalTargetDate !== project.targetDate ? (

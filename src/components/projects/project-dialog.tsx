@@ -128,12 +128,12 @@ export function ProjectDialog() {
             placeholder="Qué quieren lograr"
             rows={2}
           />
-          <div className="grid grid-cols-2 gap-3">
-            <label className="space-y-1 text-sm">
+          <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2">
+            <label className="min-w-0 space-y-1 text-sm">
               <span className="text-xs text-muted-foreground">Inicio</span>
               <Input type="date" value={form.startDate} onChange={(event) => setDraft({ ...form, startDate: event.target.value })} />
             </label>
-            <label className="space-y-1 text-sm">
+            <label className="min-w-0 space-y-1 text-sm">
               <span className="text-xs text-muted-foreground">Objetivo</span>
               <Input type="date" value={form.targetDate} onChange={(event) => setDraft({ ...form, targetDate: event.target.value })} />
             </label>

@@ -26,6 +26,7 @@ import { visibleProjects } from "@/lib/domain/filters";
 import { laneOf } from "@/lib/domain/operations";
 import {
   CARD_HEIGHT,
+  DAY_WIDTH,
   dateToX,
   laneFromY,
   monthDeltaFromDrag,
@@ -85,7 +86,7 @@ function MapCanvas() {
   const [nodes, setNodes, onNodesChange] = useNodesState<ProjectFlowNode>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [viewport, setViewport] = useState({ x: 0, y: 0, zoom: 1 });
-  const [width, setWidth] = useState(800);
+  const [width, setWidth] = useState(0);
   const frameRef = useRef<HTMLDivElement>(null);
   const interacting = useRef(false);
   const flow = useReactFlow();
@@ -117,6 +118,7 @@ function MapCanvas() {
     return () => observer.disconnect();
   }, []);
 
+  const fitted = useRef(false);
   const setZoom = useUiStore((state) => state.setZoom);
   useOnViewportChange({
     onChange: (next) => {
@@ -128,14 +130,26 @@ function MapCanvas() {
   });
 
   useEffect(() => {
+    if (fitted.current || width < 100) {
+      return;
+    }
+    fitted.current = true;
+    const zoom = zoomForWidth(width);
+    flow.setCenter(dateToX(todayIso()) + futureShift(width, zoom), 180, { zoom });
+  }, [width, flow]);
+
+  useEffect(() => {
     if (!viewportRequest || !bundle) {
       return;
     }
+    const pane = frameRef.current?.clientWidth ?? 0;
     if (viewportRequest.type === "today") {
-      flow.setCenter(dateToX(todayIso()), 180, { zoom: flow.getZoom(), duration: 450 });
+      const zoom = flow.getZoom();
+      flow.setCenter(dateToX(todayIso()) + futureShift(pane, zoom), 180, { zoom, duration: 450 });
     }
     if (viewportRequest.type === "year") {
-      flow.setCenter(dateToX(`${viewportRequest.year}-01-15`), 180, { zoom: flow.getZoom(), duration: 450 });
+      const zoom = flow.getZoom();
+      flow.setCenter(dateToX(`${viewportRequest.year}-01-15`) + futureShift(pane, zoom), 180, { zoom, duration: 450 });
     }
     if (viewportRequest.type === "zoom-in") {
       void flow.zoomIn({ duration: 180 });
@@ -149,10 +163,10 @@ function MapCanvas() {
         return;
       }
       const span = spanForRange(project.startDate, project.targetDate);
-      flow.setCenter(span.x + span.width / 2, yFromLane(laneOf(bundle, project.id)) + 40, {
-        zoom: Math.max(flow.getZoom(), 0.85),
-        duration: 450,
-      });
+      const pane = frameRef.current?.clientWidth || 360;
+      const zoom = Math.min(1, Math.max(0.55, (pane - 32) / Math.max(span.width, 160)));
+      const centerX = span.x + pane / zoom / 2 - 16 / zoom;
+      flow.setCenter(centerX, yFromLane(laneOf(bundle, project.id)) + 40, { zoom, duration: 450 });
     }
   }, [viewportRequest, bundle, flow]);
 
@@ -213,9 +227,6 @@ function MapCanvas() {
               (item) => item.sourceId === connection.source && item.targetId === connection.target,
             );
           }}
-          onInit={(instance) => {
-            instance.setCenter(dateToX(todayIso()), 180, { zoom: 1 });
-          }}
           fitView={false}
           panOnScroll
           zoomOnScroll={false}
@@ -236,6 +247,18 @@ function MapCanvas() {
       </div>
     </div>
   );
+}
+
+function zoomForWidth(width: number): number {
+  const days = width < 520 ? 46 : width < 900 ? 64 : 92;
+  return Math.min(1, Math.max(0.55, width / (days * DAY_WIDTH)));
+}
+
+function futureShift(width: number, zoom: number): number {
+  if (width >= 720 || zoom <= 0) {
+    return 0;
+  }
+  return (width * 0.18) / zoom;
 }
 
 export function LifeMap() {

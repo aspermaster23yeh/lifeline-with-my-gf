@@ -111,7 +111,7 @@ export function AppShell() {
   }
 
   return (
-    <div className="flex h-dvh flex-col bg-background text-foreground">
+    <div className="flex h-dvh min-w-0 flex-col overflow-hidden bg-background text-foreground">
       <TopBar />
       <div className="flex min-h-0 flex-1">
         {!compact && sidebarOpen ? (
@@ -120,7 +120,7 @@ export function AppShell() {
           </div>
         ) : null}
         <Sheet open={compact && sidebarOpen} onOpenChange={setSidebarOpen}>
-          <SheetContent side="left" className="w-80 p-0">
+          <SheetContent side="left" className="w-[min(20rem,85vw)] p-0">
             <SheetHeader className="sr-only">
               <SheetTitle>Proyectos</SheetTitle>
             </SheetHeader>
@@ -133,7 +133,7 @@ export function AppShell() {
         </main>
       </div>
       {selectedId && !roomForPanel ? (
-        <div className={compact ? "fixed inset-0 z-30 bg-background" : "fixed top-14 right-0 bottom-0 z-30 w-[380px] border-l border-border bg-background shadow-xl"}>
+        <div className={compact ? "fixed inset-0 z-30 bg-background" : "fixed top-14 right-0 bottom-0 z-30 w-[min(380px,100vw)] border-l border-border bg-background shadow-xl"}>
           <DetailPanel key={selectedId} />
         </div>
       ) : null}

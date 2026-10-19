@@ -56,7 +56,7 @@ export function MoneyView() {
 
         <section className="rounded-2xl border border-border bg-card p-5">
           <p className="text-sm text-muted-foreground">Estilo de vida</p>
-          <p className="font-display mt-1 text-4xl tracking-tight text-[#1A73E8]">{currency(lifeMonth)}</p>
+          <p className="font-display mt-1 text-3xl tracking-tight text-[#1A73E8] sm:text-4xl">{currency(lifeMonth)}</p>
           <p className="mt-1 text-sm text-muted-foreground">al mes · {currency(lifeYear)} al año</p>
           <ul className="mt-4 space-y-2">
             {(bundle.lifestyle ?? []).map((item) => (
@@ -72,7 +72,7 @@ export function MoneyView() {
             ))}
           </ul>
           <form
-            className="mt-4 flex flex-wrap gap-2"
+            className="mt-4 flex flex-col gap-2 sm:flex-row"
             onSubmit={(event) => {
               event.preventDefault();
               const monthlyAmount = Math.round(Number(amount));
@@ -84,21 +84,21 @@ export function MoneyView() {
               setAmount("");
             }}
           >
-            <Input value={name} onChange={(event) => setName(event.target.value)} placeholder="Renta, comida, salidas" aria-label="Gasto mensual" className="min-w-40 flex-1" />
-            <Input value={amount} onChange={(event) => setAmount(event.target.value)} type="number" min={0} placeholder="Al mes" aria-label="Monto mensual" className="w-28" />
+            <Input value={name} onChange={(event) => setName(event.target.value)} placeholder="Renta, comida, salidas" aria-label="Gasto mensual" className="min-w-0 sm:flex-1" />
+            <Input value={amount} onChange={(event) => setAmount(event.target.value)} type="number" min={0} placeholder="Al mes" aria-label="Monto mensual" className="sm:w-28" />
             <Button type="submit" size="sm">Agregar</Button>
           </form>
         </section>
 
         <section className="rounded-2xl border border-border bg-card p-5">
           <p className="text-sm text-muted-foreground">Vivir así en {year}</p>
-          <p className="font-display mt-1 text-4xl tracking-tight">{currency(lifeYear + (chosen?.spend ?? 0))}</p>
+          <p className="font-display mt-1 text-3xl tracking-tight sm:text-4xl">{currency(lifeYear + (chosen?.spend ?? 0))}</p>
           <p className="mt-1 text-sm text-muted-foreground">Estilo de vida del año más los gastos de proyectos y actividades.</p>
         </section>
 
         <section className="rounded-2xl border border-border bg-card p-5">
           <p className="text-sm text-muted-foreground">En total nos quedaría</p>
-          <p className="font-display mt-1 text-4xl tracking-tight" style={{ color: summary.balance < 0 ? "#EA4335" : "#1A73E8" }}>
+          <p className="font-display mt-1 text-3xl tracking-tight sm:text-4xl" style={{ color: summary.balance < 0 ? "#EA4335" : "#1A73E8" }}>
             {currency(summary.balance)}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3">
